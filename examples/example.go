@@ -9,9 +9,18 @@ import (
 func main() {
 	router := cgr.NewRouter()
 
-	router.Route("/test", "GET", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
-	})
+	router.Route("/test/:id").Method("GET").Handler(testWithParamHandler).Insert()
+	router.Route("/test").Method("GET").Handler(testHandler).Insert()
+	router.Route("/favicon.ico").Method("GET").Handler(cgr.EmptyHandler).Insert()
 
 	router.Run("8080")
+}
+
+func testHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
+}
+
+func testWithParamHandler(w http.ResponseWriter, r *http.Request) {
+	id := cgr.GetParam(r.Context(), "id")
+	w.Write([]byte(id))
 }
