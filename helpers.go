@@ -14,4 +14,15 @@ func deleteEmpty(s []string) []string {
 	return removed
 }
 
+func GetParam(r *http.Request, key string) string {
+	params, _ := r.Context().Value(ParamsKey).(Params)
+
+	for _, param := range params {
+		if param.Key == key {
+			return param.Value
+		}
+	}
+	return ""
+}
+
 func EmptyHandler(w http.ResponseWriter, r *http.Request) {}

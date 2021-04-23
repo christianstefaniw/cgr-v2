@@ -21,6 +21,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func testWithParamHandler(w http.ResponseWriter, r *http.Request) {
-	id := cgr.GetParam(r.Context(), "id")
+	id := cgr.GetParam(r, "id")
 	w.Write([]byte(id))
 }

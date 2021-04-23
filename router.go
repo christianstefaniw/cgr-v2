@@ -41,14 +41,3 @@ func NewRouter() *Router {
 	tree := NewTree()
 	return &Router{Routes: tree}
 }
-
-func GetParam(ctx context.Context, key string) string {
-	params, _ := ctx.Value(ParamsKey).(Params)
-
-	for _, param := range params {
-		if param.Key == key {
-			return param.Value
-		}
-	}
-	return ""
-}
