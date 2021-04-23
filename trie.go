@@ -1,78 +1,119 @@
 package cgr
 
 import (
+	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
-type tree struct {
-	method map[string]*node
+type Tree struct {
+	Method map[string]*Node
 }
 
-type node struct {
-	route    *route
-	children map[string]*node
+type Node struct {
+	Route    *Route
+	Children map[string]*Node
 }
+
+type SearchResult struct {
+	Route  *Route
+	Params Params
+}
+
+type Param struct {
+	Key, Value string
+}
+
+type Params []*Param
 
 const (
 	pathDelimiter  string = "/"
 	paramDelimiter string = ":"
+	regexWildCard  string = "(.+)"
 )
 
-func newTree() *tree {
-	return &tree{
-		method: map[string]*node{
+func NewTree() *Tree {
+	return &Tree{
+		Method: map[string]*Node{
 			http.MethodGet: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 			http.MethodPost: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 			http.MethodPut: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 			http.MethodDelete: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 			http.MethodPatch: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 			http.MethodOptions: {
-				route:    nil,
-				children: make(map[string]*node),
+				Route:    nil,
+				Children: make(map[string]*Node),
 			},
 		},
 	}
 }
 
-func (t *tree) insert(r route) {
-	currNode := t.method[r.method]
+func (t *Tree) Insert(r *Route) {
+	for _, method := range r.Methods {
+		currNode := t.Method[method]
 
-	for _, s := range deleteEmpty(strings.Split(r.path, pathDelimiter)) {
-		if nextNode, ok := currNode.children[s]; ok {
-			currNode = nextNode
-		} else {
-			currNode.children[s] = &node{
-				route:    &r,
-				children: make(map[string]*node),
+		if r.Path == pathDelimiter {
+			currNode.Route = r
+			return
+		}
+
+		for _, s := range deleteEmpty(strings.Split(r.Path, pathDelimiter)) {
+			if nextNode, ok := currNode.Children[s]; ok {
+				currNode = nextNode
+				currNode.Route = r
+			} else {
+				currNode.Children[s] = &Node{
+					Route:    r,
+					Children: make(map[string]*Node),
+				}
+				currNode = currNode.Children[s]
 			}
-			currNode = currNode.children[s]
 		}
 	}
 }
 
-func (t *tree) search(path, method string) *route {
-	currNode := t.method[method]
-
+func (t *Tree) Search(path, method string) (*SearchResult, error) {
+	var params Params
+	currNode := t.Method[method]
 	for _, s := range deleteEmpty(strings.Split(path, pathDelimiter)) {
-		if nextNode, ok := currNode.children[s]; ok {
+		if nextNode, ok := currNode.Children[s]; ok {
 			currNode = nextNode
+		} else {
+			if len(currNode.Children) == 0 {
+				return nil, errors.New("handler is not registered")
+			}
+			for c := range currNode.Children {
+				ptn := regexWildCard
+
+				reg := regexp.MustCompile(ptn)
+
+				if reg.Match([]byte(s)) {
+					param := getParam(c)
+					params = append(params, &Param{Key: param, Value: s})
+					currNode = currNode.Children[c]
+				}
+			}
 		}
 	}
-	return currNode.route
+	return &SearchResult{Route: currNode.Route, Params: params}, nil
+}
+
+func getParam(section string) string {
+	return section[1:]
 }

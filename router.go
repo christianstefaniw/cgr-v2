@@ -1,32 +1,54 @@
 package cgr
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 )
 
-type router struct {
-	routes *tree
+type Router struct {
+	Routes *Tree
 }
 
-func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+type Key int
+
+const ParamsKey = Key(iota)
+
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	method := req.Method
 	path := req.URL.Path
 
-	route := r.routes.search(path, method)
+	result, _ := r.Routes.Search(path, method)
 
-	route.handler.ServeHTTP(w, req)
+	if result.Params != nil {
+		ctx := context.WithValue(req.Context(), ParamsKey, result.Params)
+		req = req.WithContext(ctx)
+	}
+
+	result.Route.HandlerFunc.ServeHTTP(w, req)
 }
 
-func (r *router) Route(path, method string, handler http.HandlerFunc) {
-	newRoute := route{path: path, method: method, handler: handler}
-	r.routes.insert(newRoute)
+func (r *Router) Route(path string) *Route {
+	return &Route{Path: path, Router: r}
 }
 
-func (r *router) Run(port string) {
+func (r *Router) Run(port string) {
+	fmt.Println("Listening on:", port)
 	http.ListenAndServe(":"+port, r)
 }
 
-func NewRouter() *router {
-	tree := newTree()
-	return &router{routes: tree}
+func NewRouter() *Router {
+	tree := NewTree()
+	return &Router{Routes: tree}
+}
+
+func GetParam(ctx context.Context, key string) string {
+	params, _ := ctx.Value(ParamsKey).(Params)
+
+	for _, param := range params {
+		if param.Key == key {
+			return param.Value
+		}
+	}
+	return ""
 }

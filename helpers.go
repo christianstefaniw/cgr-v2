@@ -1,5 +1,7 @@
 package cgr
 
+import "net/http"
+
 func deleteEmpty(s []string) []string {
 	var removed []string
 
@@ -11,3 +13,5 @@ func deleteEmpty(s []string) []string {
 
 	return removed
 }
+
+func EmptyHandler(w http.ResponseWriter, r *http.Request) {}
