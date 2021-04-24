@@ -1,2 +1,2 @@
 # cgr-v2
-Second version of my golang router
+A flexible and easy to use Golang router. Take full control of each route in a clean and readable way! Version 2! 
