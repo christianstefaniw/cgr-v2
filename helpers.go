@@ -26,3 +26,7 @@ func GetParam(r *http.Request, key string) string {
 }
 
 func EmptyHandler(w http.ResponseWriter, r *http.Request) {}
+
+func CorsHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+}

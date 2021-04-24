@@ -1,26 +1,39 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ChristianStefaniw/cgr-v2"
 )
 
 func main() {
 	router := cgr.NewRouter()
-
-	router.Route("/test/:id").Method("GET").Handler(testWithParamHandler).Insert()
-	router.Route("/test").Method("GET").Handler(testHandler).Insert()
-	router.Route("/favicon.ico").Method("GET").Handler(cgr.EmptyHandler).Insert()
+	logger := cgr.NewMiddleware(loggerMiddleware)
+	cors := cgr.NewMiddleware(corsMiddleware)
+	router.Route("/").Method("GET").Handler(homeHandler).Insert()
+	router.Route("/param/:id").Method("GET").Handler(routeWithParamsHandler).HandlePreflight().Assign(logger, cors).Insert()
 
 	router.Run("8080")
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("ok"))
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "home")
 }
 
-func testWithParamHandler(w http.ResponseWriter, r *http.Request) {
+func routeWithParamsHandler(w http.ResponseWriter, r *http.Request) {
 	id := cgr.GetParam(r, "id")
-	w.Write([]byte(id))
+	fmt.Fprint(w, id)
+}
+
+func loggerMiddleware(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Logger middleware executing...")
+	fmt.Println(time.Now())
+}
+
+func corsMiddleware(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	w.Header().Add("Access-Control-Allow-Headers", "*")
 }

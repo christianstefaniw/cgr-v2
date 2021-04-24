@@ -28,9 +28,9 @@ type Param struct {
 type Params []*Param
 
 const (
-	pathDelimiter  string = "/"
-	paramDelimiter string = ":"
-	regexWildCard  string = "(.+)"
+	PathDelimiter  string = "/"
+	ParamDelimiter string = ":"
+	RegexWildCard  string = "(.+)"
 )
 
 func NewTree() *Tree {
@@ -68,15 +68,17 @@ func (t *Tree) Insert(r *Route) {
 	for _, method := range r.Methods {
 		currNode := t.Method[method]
 
-		if r.Path == pathDelimiter {
-			currNode.Route = r
+		if r.Path == PathDelimiter {
+			currNode.Children[PathDelimiter] = &Node{
+				Route:    r,
+				Children: make(map[string]*Node),
+			}
 			return
 		}
 
-		for _, s := range deleteEmpty(strings.Split(r.Path, pathDelimiter)) {
+		for _, s := range deleteEmpty(strings.Split(r.Path, PathDelimiter)) {
 			if nextNode, ok := currNode.Children[s]; ok {
 				currNode = nextNode
-				currNode.Route = r
 			} else {
 				currNode.Children[s] = &Node{
 					Route:    r,
@@ -85,28 +87,42 @@ func (t *Tree) Insert(r *Route) {
 				currNode = currNode.Children[s]
 			}
 		}
+		currNode.Route = r
 	}
 }
 
 func (t *Tree) Search(path, method string) (*SearchResult, error) {
 	var params Params
+	var count int
 	currNode := t.Method[method]
-	for _, s := range deleteEmpty(strings.Split(path, pathDelimiter)) {
+
+	if path == PathDelimiter {
+		if node, ok := currNode.Children[PathDelimiter]; ok {
+			return &SearchResult{Route: node.Route, Params: nil}, nil
+		}
+		return nil, errors.New("handler is not registered")
+	}
+
+	for _, s := range deleteEmpty(strings.Split(path, PathDelimiter)) {
 		if nextNode, ok := currNode.Children[s]; ok {
 			currNode = nextNode
 		} else {
 			if len(currNode.Children) == 0 {
 				return nil, errors.New("handler is not registered")
 			}
-			for c := range currNode.Children {
-				ptn := regexWildCard
-
+			children := currNode.Children
+			for section := range children {
+				ptn := RegexWildCard
 				reg := regexp.MustCompile(ptn)
 
 				if reg.Match([]byte(s)) {
-					param := getParam(c)
+					param := getParam(section)
 					params = append(params, &Param{Key: param, Value: s})
-					currNode = currNode.Children[c]
+					currNode = children[section]
+					count++
+				}
+				if count == len(children)-1 {
+					return nil, errors.New("handler is not registered")
 				}
 			}
 		}

@@ -15,17 +15,30 @@ type Key int
 const ParamsKey = Key(iota)
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	defer internalError(w)
+
 	method := req.Method
 	path := req.URL.Path
 
-	result, _ := r.Routes.Search(path, method)
+	result, err := r.Routes.Search(path, method)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Access %s: %s", path, err), http.StatusNotImplemented)
+		return
+	}
 
 	if result.Params != nil {
 		ctx := context.WithValue(req.Context(), ParamsKey, result.Params)
 		req = req.WithContext(ctx)
 	}
 
-	result.Route.HandlerFunc.ServeHTTP(w, req)
+	result.Route.ExecuteRoute(w, req)
+}
+
+func internalError(w http.ResponseWriter) {
+	if r := recover(); r != nil {
+		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func (r *Router) Route(path string) *Route {
