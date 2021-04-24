@@ -2,7 +2,7 @@
 A flexible and easy to use Golang router. Take full control of each route in a clean and readable way! Version 2! 
 
 ## Installation
-```go get https://github.com/ChristianStefaniw/cgr-v2```
+```go get github.com/ChristianStefaniw/cgr-v2```
 
 ## Example
 ```golang
