@@ -108,23 +108,29 @@ func (t *Tree) Search(path, method string) (*SearchResult, error) {
 			currNode = nextNode
 		} else {
 			if len(currNode.Children) == 0 {
-				return nil, errors.New("handler is not registered")
+				return nil, errors.New("handler is not registered 1")
 			}
 			children := currNode.Children
 			for section := range children {
-				ptn := RegexWildCard
-				reg := regexp.MustCompile(ptn)
+				if string(section[0]) == ParamDelimiter {
+					ptn := RegexWildCard
+					reg := regexp.MustCompile(ptn)
 
-				if reg.Match([]byte(s)) {
-					param := getParam(section)
-					params = append(params, &Param{Key: param, Value: s})
-					currNode = children[section]
-					count++
-				}
-				if count == len(children)-1 {
-					return nil, errors.New("handler is not registered")
+					if reg.Match([]byte(s)) {
+						param := getParam(section)
+						params = append(params, &Param{Key: param, Value: s})
+						currNode = children[section]
+						count++
+					} else if count == len(children)-1 {
+						return nil, errors.New("handler is not registered 2")
+					}
 				}
 			}
+		}
+	}
+	if currNode.Route.Path != path {
+		if params == nil {
+			return nil, errors.New("handler is not registered 3")
 		}
 	}
 	return &SearchResult{Route: currNode.Route, Params: params}, nil
