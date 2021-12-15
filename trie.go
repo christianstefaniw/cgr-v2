@@ -97,10 +97,7 @@ func (t *Tree) Search(path, method string) (*SearchResult, error) {
 	currNode := t.Method[method]
 
 	if path == PathDelimiter {
-		if node, ok := currNode.Children[PathDelimiter]; ok {
-			return &SearchResult{Route: node.Route, Params: nil}, nil
-		}
-		return nil, errors.New("handler is not registered")
+		return pathIsPathDelim(currNode)
 	}
 
 	for _, s := range deleteEmpty(strings.Split(path, PathDelimiter)) {
@@ -108,32 +105,41 @@ func (t *Tree) Search(path, method string) (*SearchResult, error) {
 			currNode = nextNode
 		} else {
 			if len(currNode.Children) == 0 {
-				return nil, errors.New("handler is not registered 1")
+				return HandlerNotRegisted()
 			}
 			children := currNode.Children
 			for section := range children {
 				if string(section[0]) == ParamDelimiter {
 					ptn := RegexWildCard
 					reg := regexp.MustCompile(ptn)
-
 					if reg.Match([]byte(s)) {
 						param := getParam(section)
 						params = append(params, &Param{Key: param, Value: s})
 						currNode = children[section]
 						count++
 					} else if count == len(children)-1 {
-						return nil, errors.New("handler is not registered 2")
+						return HandlerNotRegisted()
 					}
+				} else {
+					return HandlerNotRegisted()
 				}
 			}
 		}
 	}
+
 	if currNode.Route.Path != path {
 		if params == nil {
-			return nil, errors.New("handler is not registered 3")
+			return HandlerNotRegisted()
 		}
 	}
 	return &SearchResult{Route: currNode.Route, Params: params}, nil
+}
+
+func pathIsPathDelim(currNode *Node) (*SearchResult, error) {
+	if node, ok := currNode.Children[PathDelimiter]; ok {
+		return &SearchResult{Route: node.Route, Params: nil}, nil
+	}
+	return nil, errors.New("handler is not registered")
 }
 
 func getParam(section string) string {

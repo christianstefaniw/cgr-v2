@@ -1,6 +1,9 @@
 package cgr
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 func deleteEmpty(s []string) []string {
 	var removed []string
@@ -29,4 +32,8 @@ func EmptyHandler(w http.ResponseWriter, r *http.Request) {}
 
 func CorsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
+}
+
+func HandlerNotRegisted() (*SearchResult, error) {
+	return nil, errors.New("handler is not registered")
 }

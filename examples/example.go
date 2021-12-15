@@ -11,9 +11,9 @@ import (
 func main() {
 	router := cgr.NewRouter()
 	logger := cgr.NewMiddleware(loggerMiddleware)
-	cors := cgr.NewMiddleware(corsMiddleware)
-	router.Route("/param/test").Method("GET").Handler(homeHandler).Insert()
-	router.Route("/param/test/:id").Method("GET").Handler(routeWithParamsHandler).HandlePreflight().Assign(logger, cors).Insert()
+	router.Route("/").Method("GET").Handler(homeHandler).Insert()
+	router.Route("/param/:id").Method("GET").Handler(routeWithParamsHandler).HandlePreflight().Assign(logger).Insert()
+
 	router.Run("8080")
 }
 
@@ -29,10 +29,4 @@ func routeWithParamsHandler(w http.ResponseWriter, r *http.Request) {
 func loggerMiddleware(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Logger middleware executing...")
 	fmt.Println(time.Now())
-}
-
-func corsMiddleware(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
-	w.Header().Add("Access-Control-Allow-Headers", "*")
 }

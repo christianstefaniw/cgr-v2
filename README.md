@@ -1,4 +1,6 @@
-<h1 align='center'>CGR V2</h1>
+<div align='center'>
+	<img src='https://raw.githubusercontent.com/christianstefaniw/cgr-v2/master/assets/logo.png'>
+</div>
 
 <div align='center'>
 	<a href="https://goreportcard.com/report/github.com/ChristianStefaniw/cgr-v2">
@@ -6,12 +8,10 @@
 	</a>
 </div>
 
-A flexible and easy to use Golang router. Take full control of each route in a clean and readable way! Version 2! 
-
-## Installation
+### Installation
 ```go get github.com/ChristianStefaniw/cgr-v2```
 
-## Example
+### Example
 ```golang
 package main
 
@@ -44,12 +44,6 @@ func routeWithParamsHandler(w http.ResponseWriter, r *http.Request) {
 func loggerMiddleware(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Logger middleware executing...")
 	fmt.Println(time.Now())
-}
-
-func corsMiddleware(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
-	w.Header().Add("Access-Control-Allow-Headers", "*")
 }
 
 ```
