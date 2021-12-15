@@ -19,9 +19,8 @@ import (
 func main() {
 	router := cgr.NewRouter()
 	logger := cgr.NewMiddleware(loggerMiddleware)
-	cors := cgr.NewMiddleware(corsMiddleware)
 	router.Route("/").Method("GET").Handler(homeHandler).Insert()
-	router.Route("/param/:id").Method("GET").Handler(routeWithParamsHandler).HandlePreflight().Assign(logger, cors).Insert()
+	router.Route("/param/:id").Method("GET").Handler(routeWithParamsHandler).HandlePreflight().Assign(logger).Insert()
 
 	router.Run("8080")
 }
