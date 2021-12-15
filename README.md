@@ -1,4 +1,11 @@
-# cgr-v2
+<h1 align='center'>CGR V2</h1>
+
+<div align='center'>
+	<a href="https://goreportcard.com/report/github.com/ChristianStefaniw/cgr-v2">
+		<img src="https://goreportcard.com/badge/github.com/ChristianStefaniw/cgr-v2"/>
+	</a>
+</div>
+
 A flexible and easy to use Golang router. Take full control of each route in a clean and readable way! Version 2! 
 
 ## Installation
