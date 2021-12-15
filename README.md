@@ -6,10 +6,19 @@
 	<a href="https://goreportcard.com/report/github.com/ChristianStefaniw/cgr-v2">
 		<img src="https://goreportcard.com/badge/github.com/ChristianStefaniw/cgr-v2"/>
 	</a>
+	<a href="https://img.shields.io/tokei/lines/github/christianstefaniw/cgr-v2">
+		<img src="https://img.shields.io/tokei/lines/github/christianstefaniw/cgr-v2">
+	</a>
+	<a href="https://img.shields.io/github/license/christianstefaniw/cgr-v2">
+		<img src="https://img.shields.io/github/license/christianstefaniw/cgr-v2">
+	</a>
 </div>
 
 ### Installation
 ```go get github.com/ChristianStefaniw/cgr-v2```
+
+### Instructions
+
 
 ### Example
 ```golang

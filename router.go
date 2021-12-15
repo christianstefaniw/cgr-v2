@@ -10,9 +10,10 @@ type Router struct {
 	Routes *Tree
 }
 
-type Key int
+type key int
 
-const ParamsKey = Key(iota)
+// Key for url parameters in context
+const ParamsKey = key(iota)
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer internalError(w)

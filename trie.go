@@ -7,25 +7,42 @@ import (
 	"strings"
 )
 
+// Trie tree holding all routes.
 type Tree struct {
 	Method map[string]*Node
 }
 
+// Node in routes tree
 type Node struct {
-	Route    *Route
+
+	// Route belonging to node
+	Route *Route
+
+	// Nodes below this node
 	Children map[string]*Node
 }
 
+// Returned when a node was found in a search.
 type SearchResult struct {
 	Route  *Route
 	Params Params
 }
 
-type Param struct {
-	Key, Value string
+// URL parameter with key and value.
+type param struct {
+
+	// Name of parameter in url
+	//
+	// Ex, /:id, id would be the key
+	Key string
+
+	// Value of parameter (argument) in url
+	//
+	// Ex, /this-is-my-id, this-is-my-id would be the value
+	Value string
 }
 
-type Params []*Param
+type Params []*param
 
 const (
 	PathDelimiter  string = "/"
@@ -92,7 +109,7 @@ func (t *Tree) Insert(r *Route) {
 }
 
 func (t *Tree) Search(path, method string) (*SearchResult, error) {
-	var params Params
+	var allParams Params
 	var count int
 	currNode := t.Method[method]
 
@@ -113,8 +130,8 @@ func (t *Tree) Search(path, method string) (*SearchResult, error) {
 					ptn := RegexWildCard
 					reg := regexp.MustCompile(ptn)
 					if reg.Match([]byte(s)) {
-						param := getParam(section)
-						params = append(params, &Param{Key: param, Value: s})
+						currParam := getParam(section)
+						allParams = append(allParams, &param{Key: currParam, Value: s})
 						currNode = children[section]
 						count++
 					} else if count == len(children)-1 {
@@ -128,11 +145,11 @@ func (t *Tree) Search(path, method string) (*SearchResult, error) {
 	}
 
 	if currNode.Route.Path != path {
-		if params == nil {
+		if allParams == nil {
 			return HandlerNotRegisted()
 		}
 	}
-	return &SearchResult{Route: currNode.Route, Params: params}, nil
+	return &SearchResult{Route: currNode.Route, Params: allParams}, nil
 }
 
 func pathIsPathDelim(currNode *Node) (*SearchResult, error) {

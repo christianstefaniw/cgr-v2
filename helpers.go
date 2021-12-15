@@ -17,6 +17,7 @@ func deleteEmpty(s []string) []string {
 	return removed
 }
 
+// Get parameter from request
 func GetParam(r *http.Request, key string) string {
 	params, _ := r.Context().Value(ParamsKey).(Params)
 
@@ -28,8 +29,10 @@ func GetParam(r *http.Request, key string) string {
 	return ""
 }
 
+// Literally just an empty handler helper
 func EmptyHandler(w http.ResponseWriter, r *http.Request) {}
 
+// Respond with success if request was a preflight request
 func CorsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
