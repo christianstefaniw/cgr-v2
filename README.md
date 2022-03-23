@@ -17,9 +17,6 @@
 ### Installation
 ```go get github.com/ChristianStefaniw/cgr-v2```
 
-### Instructions
-
-
 ### Example
 ```golang
 package main
